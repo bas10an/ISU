@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include <iostream>
 using namespace std;
+//For checking time
+#include <time.h>
 
 struct DATA{
     Vector* vec;
@@ -11,9 +13,15 @@ struct DATA{
 
 void *writerFunc(void *strukt){
     DATA* Data = (DATA*)strukt;
+    // const clock_t begin_time = clock();     //timer start
+    // int ti = 0;
     while(1){
         if (!Data->vec->setAndTest(Data->ID)){      //if(not ***)
             cout << "Thread " << Data->ID << ": Error detected!" << endl;
+            // if(ti == 0){
+            //     cout << "Thread " << Data->ID << " detected an error after: " << float( clock () - begin_time ) /  CLOCKS_PER_SEC << " s" << endl;       //timer print
+            //     ti = 1;
+            // }
         }
         sleep(1);
     }
