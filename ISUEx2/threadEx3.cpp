@@ -20,14 +20,13 @@ void* reader(void* data){
     return NULL;
 }
 int main(){
-    pthread_t th[2];
-    string name0 = "incrementer";
-    string name1 = "reader";
+    pthread_t inc;
+    pthread_t read;
     unsigned int shared = 0;
-    pthread_create(&th[0], NULL, &incrementer, &shared);
-    pthread_create(&th[1], NULL, &reader, &shared);
-    pthread_join(th[0],NULL);
-    pthread_join(th[1],NULL);
+    pthread_create(&inc, NULL, &incrementer, &shared);
+    pthread_create(&read, NULL, &reader, &shared);
+    pthread_join(inc,NULL);
+    pthread_join(read,NULL);
     cout << "Main: Exiting" << endl;
     return 0;
 }

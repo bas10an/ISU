@@ -15,7 +15,7 @@ unsigned int f = 0;
 class Vector
 {
 public:
-   Vector(unsigned int size = 100000) : size_(size)
+   Vector(unsigned int size = 100) : size_(size)
       {
          if(f == 0){
             cout << "Objects in Vectors: " << size << endl;
