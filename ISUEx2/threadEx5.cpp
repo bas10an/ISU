@@ -9,6 +9,7 @@ using namespace std;
 struct DATA{
     Vector* vec;
     unsigned int ID; 
+    unsigned int interval;
 };
 
 void *writerFunc(void *strukt){
@@ -18,13 +19,12 @@ void *writerFunc(void *strukt){
     while(1){
         if (!Data->vec->setAndTest(Data->ID)){      //if(not ***)
             cout << "Thread " << Data->ID << ": Error detected!" << endl;
-            //print time for error
             if(ti == 0){
                 cout << "Thread " << Data->ID << " detected an error after: " << float( clock () - begin_time ) /  CLOCKS_PER_SEC << " s" << endl;       //timer print
                 ti = 1;
             }
         }
-        sleep(1);
+        usleep((Data->interval)*1000);
     }
     return NULL;
 }
@@ -40,9 +40,16 @@ int main(){
     DATA Input[amount];
     pthread_t writer[amount];
 
+    int interval2 = 0;
+    cout << "Type loop timein ms(default: 1000ms): ";
+    cin >> interval2;
+    interval2 = ((interval2 >= 1 && interval2 <= 1000) ? interval2 : 1000);
+    cout << "Loop time set to: " << interval2 << "ms" << endl;
+
     for(int i = 0; i < amount; i++){
         Input[i].ID = i;
         Input[i].vec = &vec;
+        Input[i].interval = interval2;
         cout << "Creating thread with ID: " << i << endl;
         pthread_create(&writer[i], NULL, &writerFunc, &Input[i]);
     }

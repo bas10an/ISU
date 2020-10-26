@@ -1,6 +1,6 @@
-SRC=threadEx4.cpp
+SRC=threadEx6.cpp
 OBJ=${SRC:.cpp=.o}
-ELSE=threadEx2.o threadEx3.o
+ELSE=threadEx2.o threadEx3.o threadEx4.o threadEx5.o
 EXE=exec
 CXX=g++ -std=c++11 -pthread
 CXXFLAG=-I.
