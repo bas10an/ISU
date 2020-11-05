@@ -1,6 +1,6 @@
-SRC=thread3_2_sema.cpp
+SRC=vector_main.cpp
 OBJ=${SRC:.cpp=.o}
-ELSE=thread3_1.o thread3_2_mutex.o
+ELSE=thread3_1.o vector_main.o
 EXE=exec
 CXX=g++ -std=c++11 -pthread
 CXXFLAG=-I.
