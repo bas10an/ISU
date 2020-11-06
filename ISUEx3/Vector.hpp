@@ -30,10 +30,13 @@ public:
 
    bool setAndTest(int n)
       {
-         pthread_mutex_lock(&m);
+         pthread_mutex_lock(&m);       //Lock
          //sem_wait(&s);
          set(n);
-         return test(n);
+         bool testResult = test(n);
+         pthread_mutex_unlock(&m);     //Unlock
+         //sem_post(&s);
+         return testResult;
       }
 
 private:
@@ -45,8 +48,6 @@ private:
    bool test(int n)
       {
          for(unsigned int i=0; i<size_; i++) if(vector_[i] != n) return false;
-         pthread_mutex_unlock(&m);
-         //sem_post(&s);
          return true;
       }
 
