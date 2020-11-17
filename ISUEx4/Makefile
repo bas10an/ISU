@@ -1,4 +1,4 @@
-SRC=2_2_PAL2000_impl.cpp
+SRC=2_1_PAL2000_impl.cpp
 OBJ=${SRC:.cpp=.o}
 ELSE=2_1_PAL2000_impl.o 2_2_PAL2000_impl.o
 EXE=exec
