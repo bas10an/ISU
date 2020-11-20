@@ -8,12 +8,22 @@ using namespace std;
 pthread_mutex_t queueMut;
 pthread_cond_t queueCond;
 
-enum {ID_POINT_3D};
+enum
+{
+    ID_POINT_3D
+};
+
 struct Point3D : public Message
 {
     int x;
     int y;
     int z;
+};
+
+struct Item
+{
+    Message* msg_;
+    MsgQueue* mq_;
 };
 
 void* Sender(void* arg)
@@ -38,10 +48,10 @@ void handleMsg(unsigned int id, Message* msg)
 
 void* Receiver(void* arg)
 {
-    MsgQueue* MSQ = (MsgQueue*)arg;
+    Item* ITEM = (Item*)arg;
     while(1)
     {
-        Message* p3D = MSQ->receive(handleMsg(ID_POINT_3D, static_cast<Point3D> msg));
+        Message* p3D = ITEM->mq_->receive(handleMsg(ID_POINT_3D, ITEM->msg_));
     }
     return NULL;
 }
@@ -52,16 +62,13 @@ int main(int argc, char* argv[])
     pthread_mutex_init(&queueMut, NULL);
     pthread_cond_init(&queueCond, NULL);
 
-    if(argc == 2)
-    {
-        MsgQueue MSQ(atoi(argv[1]));
-        pthread_create(&S, NULL, Sender, &MSQ);
-    }
-    else
-    {
-        MsgQueue MSQ(1);
-        pthread_create(&S, NULL, Sender, &MSQ);
-    }
+    Item item;
+    item.mq_ = argc >= 2 ? new MsgQueue(atoi(argv[1])) : new MsgQueue(1);
+    item.id = 1;
+
+    pthread_create(&S, NULL, Sender, &item);
+    pthread_create(&R, NULL, Receiver, &item);
+    
     while(1){}
     return 0;
 }

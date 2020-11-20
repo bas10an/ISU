@@ -18,14 +18,16 @@ void* PLCS_entry(void* arg){
     while(!carWaiting)
         pthread_cond_wait(&entry, &mEntry);
 
+    cout << "PLCS Entry - Opened." << endl;
     PLCS_ENTRY_IS_OPEN = true;
-    cout << "Entry Opened." << endl;
+
     pthread_cond_signal(&entry);
     while(carWaiting)
         pthread_cond_wait(&entry, &mEntry);
     
+    cout << "PLCS Entry - Closed." << endl;
     PLCS_ENTRY_IS_OPEN = false;
-    cout << "Entry Closed." << endl;
+
     pthread_mutex_unlock(&mEntry);
     }
     return NULL;
@@ -39,14 +41,16 @@ void* PLCS_exit(void* arg){
     while(!carWaiting)
         pthread_cond_wait(&Exit, &mExit);
 
+    cout << "PLCS Exit - Opened." << endl;
     PLCS_EXIT_IS_OPEN = true;
-    cout << "Exit Opened." << endl;
+    
     pthread_cond_signal(&Exit);
     while(carWaiting)
         pthread_cond_wait(&Exit, &mExit);
     
+    cout << "PLCS Exit - Closed." << endl;
     PLCS_EXIT_IS_OPEN = false;
-    cout << "Exit Closed." << endl;
+    
     pthread_mutex_unlock(&mExit);
     }
     return NULL;
@@ -56,8 +60,8 @@ void* PLCS_exit(void* arg){
 void* CAR(void* arg){
     while(1){
         /*....Car Entry....*/
-        cout << "Car drives to Entry." << endl;
         pthread_mutex_lock(&mEntry);
+        cout << "CAR - Waiting at Entry." << endl;
         carWaiting = true;
         pthread_cond_signal(&entry);
 
@@ -66,12 +70,13 @@ void* CAR(void* arg){
 
         carWaiting = false;
         pthread_cond_signal(&entry);
+        cout << "CAR - Enters parkinglot." << endl;
         pthread_mutex_unlock(&mEntry);
 
         /*....Entered and waiting before Exiting....*/
-        cout << "Car entered parkinglot." << endl;
+        
         int time = 2;
-        cout << "Parking for " << time << " seconds." << endl;
+        cout << "CAR - Parking for " << time << " seconds." << endl;
         sleep(time);
 
         /*....Car Exit....*/
@@ -84,8 +89,9 @@ void* CAR(void* arg){
 
         carWaiting = false;
         pthread_cond_signal(&Exit);
+        cout << "CAR - Exits parkinglot" << endl;
         pthread_mutex_unlock(&mExit);
-        cout << "Car exited parkinglot" << endl;
+
         sleep(time);
     }
     return NULL;
@@ -103,8 +109,11 @@ int main(){
     pthread_t PLCS_exit_door;
 
     pthread_create(&PLCS_entry_door, NULL, PLCS_entry, NULL);
+    cout << "PLCS Entry - Created" << endl;
     pthread_create(&PLCS_exit_door, NULL, PLCS_exit, NULL);
+    cout << "PLCS Exit - Created" << endl;
     pthread_create(&car, NULL, CAR, NULL);
+    cout << "CAR - Created" << endl;
 
     while(1){}
 
