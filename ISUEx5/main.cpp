@@ -1,73 +1,84 @@
-#include <pthread.h>
-#include <unistd.h>
 #include "Message.hpp"
 #include "MsgQueue.hpp"
-#include <iostream>
+#include <unistd.h>
 using namespace std;
 
-pthread_mutex_t queueMut;
-pthread_cond_t queueCond;
+pthread_mutex_t printMutex;
+
+#define LOG(...) do { \
+    pthread_mutex_lock(&printMutex); \
+    std::cout << "[" << __FILE__ << ":" << __LINE__ << "] (" << __FUNCTION__ << ") :" \
+    << __VA_ARGS__;  \
+    pthread_mutex_unlock(&printMutex); \
+} while(0)
+
 
 enum
 {
-    ID_POINT_3D
+    POINT3D_IND
 };
+
 
 struct Point3D : public Message
 {
-    int x;
-    int y;
-    int z;
+    int x, y, z;
 };
 
-struct Item
-{
-    Message* msg_;
-    MsgQueue* mq_;
-};
 
 void* Sender(void* arg)
 {
-    MsgQueue* MSQ = (MsgQueue*)arg;
-    while(1)
+    MsgQueue* mq = (MsgQueue*)arg;
+    for(unsigned long i = 0;; i++)
     {
-        MSQ->send(ID_POINT_3D, new Point3D);
+        Point3D* point3D = new Point3D;
+        point3D->x = i;
+        point3D->y = i;
+        point3D->z = i;
+        mq->send(POINT3D_IND, point3D);
+        sleep(1);
     }
-    sleep(1);
     return NULL;
 }
+
+
+void printPoint3DVars(Point3D* P3D)
+{
+    LOG("Point 3D - x: " << P3D->x << " y: " << P3D->y << " z: " << P3D->y << endl);
+}
+
 
 void handleMsg(unsigned int id, Message* msg)
 {
     switch(id)
     {
-        case ID_POINT_3D:
-            
+        case POINT3D_IND:
+            printPoint3DVars(static_cast<Point3D*>(msg));
     }
 }
 
 void* Receiver(void* arg)
 {
-    Item* ITEM = (Item*)arg;
+    MsgQueue* mq = (MsgQueue*)arg;
+    unsigned long id;
     while(1)
     {
-        Message* p3D = ITEM->mq_->receive(handleMsg(ID_POINT_3D, ITEM->msg_));
+        Message* msg = mq->receive(id);
+        handleMsg(id, msg);
+        delete msg;
     }
     return NULL;
 }
 
+
 int main(int argc, char* argv[])
 {
     pthread_t S, R;
-    pthread_mutex_init(&queueMut, NULL);
-    pthread_cond_init(&queueCond, NULL);
+    unsigned long MQSIZE = atoi(argv[1]);
 
-    Item item;
-    item.mq_ = argc >= 2 ? new MsgQueue(atoi(argv[1])) : new MsgQueue(1);
-    item.id = 1;
+    MsgQueue* mq = argc >= 2 ? new MsgQueue(MQSIZE) : new MsgQueue(1);
 
-    pthread_create(&S, NULL, Sender, &item);
-    pthread_create(&R, NULL, Receiver, &item);
+    pthread_create(&S, NULL, Sender, &mq);
+    pthread_create(&R, NULL, Receiver, &mq);
     
     while(1){}
     return 0;
