@@ -13,7 +13,7 @@ void MsgQueue::send(unsigned long id , Message* msg)
 {
     pthread_mutex_lock(&sendMut);
 
-    while(queue_.size() >= maxSize_)
+    while(queue_.size() == maxSize_)
     {
         pthread_cond_wait(&queueCond, &sendMut);
     }
@@ -28,14 +28,13 @@ void MsgQueue::send(unsigned long id , Message* msg)
 Message* MsgQueue::receive(unsigned long& id)
 {
     pthread_mutex_lock(&recMut);
-    Message* msg;
 
-    while(queue_.size() <= 0)
+    while(queue_.size() == 0)
     {
         pthread_cond_wait(&queueCond, &recMut);
     }
     id = queue_.front().first;
-    msg = queue_.front().second;
+    Message* msg = queue_.front().second;
     queue_.pop();
 
     pthread_cond_broadcast(&queueCond); //queue not full
